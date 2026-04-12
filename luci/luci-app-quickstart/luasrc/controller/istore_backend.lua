@@ -6,6 +6,8 @@ local nixio = require "nixio"
 local ltn12 = require "luci.ltn12"
 local table = require "table"
 local util = require "luci.util"
+local jsonc = require "luci.jsonc"
+local uci = require("luci.model.uci").cursor()
 
 module("luci.controller.istore_backend", package.seeall)
 
@@ -19,6 +21,20 @@ end
 local function write_json(data)
     http.prepare_content("application/json")
     http.write_json(data)
+end
+
+local function read_json_body()
+    local body = http.content() or ""
+    if body == "" then
+        return {}
+    end
+
+    local data = jsonc.parse(body)
+    if type(data) ~= "table" then
+        return nil, "invalid json body"
+    end
+
+    return data
 end
 
 local function current_time_text()
@@ -79,6 +95,36 @@ local function system_status_payload()
     }
 end
 
+local function module_settings_payload()
+    local disabled = uci:get_list("quickstart", "main", "diableDisplay")
+    if type(disabled) ~= "table" then
+        local single = uci:get("quickstart", "main", "diableDisplay")
+        disabled = (single and single ~= "") and { single } or {}
+    end
+
+    return {
+        diableDisplay = disabled
+    }
+end
+
+local function sanitize_disabled_list(items)
+    local cleaned = {}
+    if type(items) ~= "table" then
+        return cleaned
+    end
+
+    for _, item in ipairs(items) do
+        if type(item) == "string" then
+            item = item:match("^%s*(.-)%s*$")
+            if item and item ~= "" then
+                cleaned[#cleaned + 1] = item
+            end
+        end
+    end
+
+    return cleaned
+end
+
 local function maybe_handle_local_api()
     local uri = http.getenv("REQUEST_URI") or ""
     if uri:match("/cgi%-bin/luci/istore/system/status/?$") then
@@ -89,6 +135,37 @@ local function maybe_handle_local_api()
         local temp = read_thermal_celsius()
         write_json({ code = 0, result = { temperature = temp, cpuTemperature = temp } })
         return true
+    end
+    if uri:match("/cgi%-bin/luci/istore/system/module%-settings/?$") then
+        local method = http.getenv("REQUEST_METHOD") or "GET"
+
+        if method == "GET" then
+            write_json({ code = 0, result = module_settings_payload() })
+            return true
+        end
+
+        if method == "POST" then
+            local data, err = read_json_body()
+            if not data then
+                http.status(400, "bad request")
+                write_json({ code = 1, error = err or "invalid body" })
+                return true
+            end
+
+            local disabled = sanitize_disabled_list(data.diableDisplay)
+            uci:delete("quickstart", "main", "diableDisplay")
+            if #disabled > 0 then
+                uci:set_list("quickstart", "main", "diableDisplay", disabled)
+            end
+            uci:commit("quickstart")
+
+            write_json({
+                code = 0,
+                success = 0,
+                result = { diableDisplay = disabled }
+            })
+            return true
+        end
     end
     return false
 end
