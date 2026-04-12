@@ -1,0 +1,10 @@
+{
+  "product": "nas-packages-luci",
+  "agent": "claude",
+  "generated_at": "2026-04-12T23:26:35.144330+00:00",
+  "skill_repo": "/Users/shawnrain/agent-skills",
+  "skill_repo_commit": "0a621f3f3c3d3ff03243aa7ac27fb7d826e8717e",
+  "adapter_mode": "generated-only",
+  "skills": [],
+  "workflows": []
+}

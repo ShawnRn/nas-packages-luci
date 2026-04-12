@@ -1,0 +1,9 @@
+product: nas-packages-luci
+skill_repo: /Users/shawnrain/agent-skills
+enabled_skills: []
+enabled_workflows: []
+preferred_agents:
+  - codex
+local_overrides:
+  - quickstart-24_10-rules
+adapter_mode: generated-only

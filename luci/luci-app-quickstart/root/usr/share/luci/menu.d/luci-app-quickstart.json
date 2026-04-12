@@ -1,6 +1,6 @@
 {
 	"admin/quickstart/*": {
-		"title": "QuickStart",
+		"title": "首页",
 		"order": 1,
 		"action": {
 			"type": "template",

@@ -5,9 +5,7 @@ module("luci.controller.quickstart", package.seeall)
 function index()
     if luci.sys.call("pgrep quickstart >/dev/null") == 0 then
         local uci = require "luci.model.uci".cursor()
-        entry({"admin", "quickstart"}, template("quickstart/home"), _("QuickStart"), 1).leaf = true
-        entry({"admin", "network_guide"}, call("networkguide_index"), _("NetworkGuide"), 2)
-        entry({"admin", "network_guide", "pages"}, call("quickstart_index", {index={"admin", "network_guide", "pages"}})).leaf = true
+        entry({"admin", "quickstart"}, template("quickstart/home"), _("首页"), 1).leaf = true
         if uci:get("quickstart", "main", "wifi_menu") == "1" then
             entry({"admin", "quickwifi"}, call("quickwifi_index"), _("Wireless"), 3)
             entry({"admin", "quickwifi", "pages"}, call("quickstart_index", {index={"admin", "quickwifi", "pages"}})).leaf = true
@@ -27,10 +25,6 @@ function index()
     end
 end
 
-function networkguide_index()
-    luci.http.redirect(luci.dispatcher.build_url("admin", "network_guide", "pages", "network"))
-end
-
 function quickwifi_index()
     luci.http.redirect(luci.dispatcher.build_url("admin", "quickwifi", "pages", "quickwifi"))
 end
@@ -43,7 +37,7 @@ local function vue_lang()
     local i18n = require("luci.i18n")
     local lang = i18n.translate("quickstart_vue_lang")
     if lang == "quickstart_vue_lang" or lang == "" then
-        lang = "en"
+        lang = "zh-cn"
     end
     return lang
 end
