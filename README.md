@@ -6,11 +6,22 @@
 - 移除 `NetworkGuide` 入口
 - 前端语言缺省回退到 `zh-cn`
 - `/cgi-bin/luci/istore/system/status/` 提供本地兜底
+- `/cgi-bin/luci/istore/system/cpu/temperature/` 提供本地温度兜底
+- `QuickStart` 温度显示修复基于后端接口，不依赖前端 DOM 劫持
 - `istore_backend.lua` 优先转发到 `/var/run/quickstart/local.sock`，兼容当前 quickstart 服务
 
 ## 包构建
 
-仓库内提供 GitHub Actions，可按 OpenWrt `24.10.0` SDK 为多个目标架构构建 `luci-app-quickstart` 的 `ipk` 工件。
+仓库内提供 GitHub Actions，可按 OpenWrt `24.10.0` SDK 为多个目标架构构建完整的 `QuickStart` 依赖包集合，包括：
+
+- `quickstart`
+- `taskd`
+- `luci-lib-xterm`
+- `luci-lib-taskd`
+- `luci-app-store`
+- `luci-app-quickstart`
+
+温度显示修复包含在 `luci-app-quickstart` 当前源码中；自 `0.12.6-r2` 起，构建出的 `ipk` 默认携带这部分修复。
 
 ## 说明
 
