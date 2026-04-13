@@ -19,6 +19,7 @@
 - 前端语言优先按 LuCI 传入 `lang` 加载，缺省回退 `zh-cn`。
 - 系统信息接口优先在 `istore_backend.lua` 本地生成兜底结果，不依赖外部后端一定在线。
 - 温度显示必须通过 `/cgi-bin/luci/istore/system/status/` 和 `/cgi-bin/luci/istore/system/cpu/temperature/` 返回 `cpuTemperature` / `temperature` 字段来修复。
+- `/cgi-bin/luci/istore/system/module-settings/` 在空配置时也必须返回数组 `[]`，不能把 `diableDisplay` 写成 `{}`，否则 QuickStart 首页会触发 `forEach` 异常。
 - 不要再引入“定时抓取温度后直接篡改页面 DOM”这类前端 hack；如果显示为 `0°C`，先查后端 JSON。
 - 转发到 quickstart 后端时，优先使用 Unix socket `/var/run/quickstart/local.sock`，必要时才回退到 `127.0.0.1:3038`。
 - 不要在这个仓库里混入 `luci-theme-design` 相关修复。

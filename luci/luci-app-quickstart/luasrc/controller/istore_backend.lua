@@ -20,7 +20,7 @@ end
 
 local function write_json(data)
     http.prepare_content("application/json")
-    http.write_json(data)
+    http.write(jsonc.stringify(data))
 end
 
 local function read_json_body()
