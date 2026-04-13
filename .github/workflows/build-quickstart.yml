@@ -43,7 +43,15 @@ jobs:
       - name: Stage package sources
         run: |
           mkdir -p "$SDK_DIR/package/codex"
+          git clone --depth 1 https://github.com/linkease/istore.git "$RUNNER_TEMP/istore"
+          git clone --depth 1 https://github.com/linkease/nas-packages.git "$RUNNER_TEMP/nas-packages"
           cp -R "$GITHUB_WORKSPACE/luci/luci-app-quickstart" "$SDK_DIR/package/codex/"
+          cp -R "$RUNNER_TEMP/istore/luci/luci-app-store" "$SDK_DIR/package/codex/"
+          cp -R "$RUNNER_TEMP/istore/luci/luci-lib-taskd" "$SDK_DIR/package/codex/"
+          cp -R "$RUNNER_TEMP/istore/luci/luci-lib-xterm" "$SDK_DIR/package/codex/"
+          cp -R "$RUNNER_TEMP/istore/luci/taskd" "$SDK_DIR/package/codex/"
+          cp -R "$RUNNER_TEMP/nas-packages/network/services/quickstart" "$SDK_DIR/package/codex/"
+          find "$SDK_DIR/package/codex" -maxdepth 1 -mindepth 1 -type d -print | sort
 
       - name: Update feeds
         working-directory: ${{ env.SDK_DIR }}
@@ -51,16 +59,30 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-      - name: Build luci-app-quickstart
+      - name: Build QuickStart package set
         working-directory: ${{ env.SDK_DIR }}
         run: |
           make defconfig
-          make package/luci-app-quickstart/compile V=s
+          make \
+            package/quickstart/compile \
+            package/taskd/compile \
+            package/luci-lib-xterm/compile \
+            package/luci-lib-taskd/compile \
+            package/luci-app-store/compile \
+            package/luci-app-quickstart/compile \
+            V=s
 
       - name: Collect artifacts
         run: |
           mkdir -p "$GITHUB_WORKSPACE/dist/${{ matrix.target }}"
-          find "$SDK_DIR/bin/packages" -name 'luci-app-quickstart*.ipk' -exec cp {} "$GITHUB_WORKSPACE/dist/${{ matrix.target }}/" \;
+          find "$SDK_DIR/bin/packages" \
+            \( -name 'quickstart*.ipk' \
+            -o -name 'taskd*.ipk' \
+            -o -name 'luci-lib-xterm*.ipk' \
+            -o -name 'luci-lib-taskd*.ipk' \
+            -o -name 'luci-app-store*.ipk' \
+            -o -name 'luci-app-quickstart*.ipk' \) \
+            -exec cp {} "$GITHUB_WORKSPACE/dist/${{ matrix.target }}/" \;
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
