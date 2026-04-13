@@ -21,6 +21,8 @@
 - 温度显示必须通过 `/cgi-bin/luci/istore/system/status/` 和 `/cgi-bin/luci/istore/system/cpu/temperature/` 返回 `cpuTemperature` / `temperature` 字段来修复。
 - `/cgi-bin/luci/istore/system/module-settings/` 在空配置时也必须返回数组 `[]`，不能把 `diableDisplay` 写成 `{}`，否则 QuickStart 首页会触发 `forEach` 异常。
 - 不要再引入“定时抓取温度后直接篡改页面 DOM”这类前端 hack；如果显示为 `0°C`，先查后端 JSON。
+- `QuickStart` 入口必须保持完整的 SPA 首页体验，不要替换成简化的 `cbi-map` 欢迎页。
+- 默认首页若指向 `admin/quickstart`，应确保 `quickstart/home.htm` 渲染到 `quickstart/main`，而不是只显示静态链接列表。
 - 转发到 quickstart 后端时，优先使用 Unix socket `/var/run/quickstart/local.sock`，必要时才回退到 `127.0.0.1:3038`。
 - 不要在这个仓库里混入 `luci-theme-design` 相关修复。
 
